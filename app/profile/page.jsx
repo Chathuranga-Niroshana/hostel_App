@@ -25,7 +25,7 @@ const Profile = () => {
           const response = await fetch(`/api/user/${userId}`);
           if (response.ok) {
             const data = await response.json();
-            console.log(data);
+            // console.log(data);
             setUser(data.result[0][0]);
             setHostel(data.hostels[0]);
           }
@@ -40,11 +40,11 @@ const Profile = () => {
     fetchUserData();
   }, []);
 
-  if (hostel) {
-    hostel.map((element) => {
-      console.log(element.address);
-    });
-  }
+  // if (hostel) {
+  //   hostel.map((element) => {
+  //     console.log(element.address);
+  //   });
+  // }
 
   const parseJwt = (token) => {
     try {
@@ -95,32 +95,33 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <div>
+      <div className=" w-full  min-h-[400px] mt-6">
         <h1 className="mt-4 font-semibold text-purple-700 text-xl">
           My Hostels
         </h1>
-        {/* {hostel.type} */}
 
-        <div>
-          <Card sx={{ maxWidth: 345 }}>
-            <CardActionArea>
-              <CardMedia
-                component="img"
-                height="140"
-                image="/static/images/cards/contemplative-reptile.jpg"
-                alt="green iguana"
-              />
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                  Lizard
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Lizards are a widespread group of squamate reptiles, with over
-                  6,000 species, ranging across all continents except Antarctica
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
+        <div className="flex gap-4 mt-6">
+          {hostel &&
+            hostel.map((h, index) => (
+              <Card key={index} sx={{ maxWidth: 345 }}>
+                <CardActionArea>
+                  <CardMedia
+                    component="img"
+                    height="140"
+                    image="/static/images/cards/contemplative-reptile.jpg"
+                    alt="green iguana"
+                  />
+                  <CardContent>
+                    <Typography gutterBottom variant="h5" component="div">
+                      {h.type} - {h.address}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Price: {h.price}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            ))}
         </div>
       </div>
     </div>
