@@ -33,16 +33,18 @@ export async function GET() {
 }
 
 // create hostel
-
 export async function POST(req) {
+  const connection = await db.getConnection();
+  await connection.beginTransaction();
+
   try {
     const resultQuery = `
-      INSERT INTO hostel 
-      (type, price, owner_id, address, location_id, bed_capacity, available_date, extra, requested, raitings) 
-      VALUES (?,?,?,?,?,?,?,?,?,?)`;
+        INSERT INTO hostel 
+        (type, price, owner_id, address, location_id, bed_capacity, available_date, extra, requested, raitings) 
+        VALUES (?,?,?,?,?,?,?,?,?,?)`;
     const imageQuery = `
-      INSERT INTO images (hostel_id, image_url) 
-      VALUES (?,?)`;
+        INSERT INTO images (hostel_id, image_url) 
+        VALUES (?,?)`;
 
     const {
       type,
@@ -59,7 +61,7 @@ export async function POST(req) {
     } = await req.json();
 
     // Insert the new hostel
-    const [newHostel] = await db.query(resultQuery, [
+    const [newHostelResult] = await connection.query(resultQuery, [
       type,
       price,
       owner_id,
@@ -72,15 +74,23 @@ export async function POST(req) {
       raitings,
     ]);
 
-    const hostelId = newHostel.insertId;
+    const hostelId = newHostelResult.insertId;
 
     // Insert the images
     for (const imageUrl of images) {
-      await db.query(imageQuery, [hostelId, imageUrl]);
+      await connection.query(imageQuery, [hostelId, imageUrl]);
     }
 
-    return NextResponse.json({ success: "Hostel created successfully" }, 201);
+    await connection.commit();
+    connection.release();
+
+    return NextResponse.json(
+      { success: "Hostel created successfully", hostelId },
+      { status: 201 }
+    );
   } catch (error) {
+    await connection.rollback();
+    connection.release();
     console.error("Error creating hostel:", error);
     return NextResponse.json(
       { error: "Error creating hostel" },

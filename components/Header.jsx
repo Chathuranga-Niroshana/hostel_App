@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import headerImg from "../public/header1.jpg";
@@ -9,9 +9,22 @@ const Header = () => {
   const router = useRouter();
   const navigate = (page) => router.push(page);
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Check if auth-token exists in localStorage
+      const token = localStorage.getItem("auth-token");
+      setIsAuthenticated(!!token);
+    }
+  }, []);
+
   const handleLogout = () => {
-    localStorage.removeItem("auth-token");
-    navigate("/login");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("auth-token");
+      setIsAuthenticated(false);
+      navigate("/login");
+    }
   };
 
   return (
@@ -47,7 +60,7 @@ const Header = () => {
           >
             Chat
           </li>
-          {localStorage.getItem("auth-token") ? (
+          {isAuthenticated ? (
             <li
               onClick={handleLogout}
               className="text-red-400 text-xl font-bold hover:text-green-500 cursor-pointer "

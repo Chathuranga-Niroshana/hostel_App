@@ -1,23 +1,48 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { items } from "@/app/util/db.js";
+// import { items } from "@/app/util/db.js";
 import Image from "next/image";
 import Rating from "@mui/material/Rating";
 import Stack from "@mui/material/Stack";
 
 const Hostel = ({ params }) => {
   const [item, setItem] = useState(null);
+  const [hostelImage, setHostelImages] = useState([]);
   const [imgIndex, setImgIndex] = useState(0);
   const [ratings, setRatings] = useState("");
 
+  // useEffect(() => {
+  //   const selectedHostel = items.find((i) => i.id === parseInt(params.id));
+  //   if (selectedHostel) {
+  //     setItem(selectedHostel);
+  //   } else {
+  //     setItem(null);
+  //   }
+  // }, [params.id]);
+
+  const { id } = params;
+
   useEffect(() => {
-    const selectedHostel = items.find((i) => i.id === parseInt(params.id));
-    if (selectedHostel) {
-      setItem(selectedHostel);
-    } else {
-      setItem(null);
-    }
-  }, [params.id]);
+    const fetchHostel = async () => {
+      const response = await fetch(`/api/hostel?id=${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+
+      if (response.ok) {
+        setItem(data.result[0]); // Set hostel details
+        setHostelImages(data.images); // Set hostel images
+      } else {
+        console.error("Error fetching hostel data:", data.error);
+      }
+    };
+
+    fetchHostel();
+  }, [id]);
 
   useEffect(() => {
     if (item) {

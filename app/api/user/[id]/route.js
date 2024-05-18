@@ -1,4 +1,3 @@
-// app/api/user/[id]/route.js
 
 import db from "@/app/db";
 import { NextResponse } from "next/server";
