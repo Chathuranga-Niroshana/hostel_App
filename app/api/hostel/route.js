@@ -6,9 +6,11 @@ export async function GET() {
   try {
     const resultQuery = "SELECT * FROM hostel";
     const imageQuery = "SELECT * FROM images";
+    const locationQuery = "SELECT * FROM location";
 
     const [hostelRows, hostelFields] = await db.query(resultQuery);
     const [imageRows, imageFields] = await db.query(imageQuery);
+    const locationResults = await db.query(locationQuery);
 
     // Combine hostel data with images
     const hostelsWithImages = hostelRows.map((hostel) => {
@@ -22,7 +24,10 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({result:hostelsWithImages});
+    return NextResponse.json({
+      result: hostelsWithImages,
+      locations: locationResults[0],
+    });
   } catch (error) {
     console.error("Error getting hostels with images:", error);
     return NextResponse.json(

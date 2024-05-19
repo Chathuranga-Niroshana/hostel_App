@@ -11,9 +11,12 @@ import { useRouter } from "next/navigation";
 
 const Home = () => {
   const router = useRouter();
-  const navigate = (page) => router.push(page);
   const [filter, setFilter] = useState("");
+  const [filterLocation, setFilterLocation] = useState("");
   const [items, setItems] = useState();
+  const [location, setLocation] = useState([]);
+
+  const navigate = (page) => router.push(page);
 
   useEffect(() => {
     const fetchHostels = async () => {
@@ -24,8 +27,10 @@ const Home = () => {
         if (response.ok) {
           const data = await response.json();
           setItems(data.result);
-          console.log(data.result);
-          console.log(data);
+          setLocation(data.locations);
+          // console.log(data.result);
+          // console.log(data);
+          // console.log(data.locations);
         }
       } catch (error) {
         console.error("Error fetching hostels:", error);
@@ -34,9 +39,18 @@ const Home = () => {
     fetchHostels();
   }, []);
 
-  const filterdItems = filter
+  const filteredItems = filter
     ? items.filter((item) => item.type === filter)
     : items;
+  const filterdLocation = filterLocation
+    ? items.filter((item) => item.location === filterLocation)
+    : items;
+  // const filteredItems = items.filter((item) => {
+  //   return (
+  //     (!filter || item.type === filter) &&
+  //     (!filterLocation || item.location === filterLocation)
+  //   );
+  // });
 
   return (
     <div className="w-full h-full">
@@ -58,19 +72,22 @@ const Home = () => {
             <option value="Apartment">Apartment</option>
           </Select>
         </FormControl>
+
         <FormControl sx={{ m: 1, minWidth: 200 }}>
           <InputLabel htmlFor="grouped-native-select">Location</InputLabel>
           <Select
             native
-            value={filter}
+            value={filterLocation}
+            onChange={(e) => setFilterLocation(e.target.value)}
             id="grouped-native-select"
             label="Grouping"
           >
             <option aria-label="None" value="" />
-            <option value={1}>Option 1</option>
-            <option value={2}>Option 2</option>
-            <option value={3}>Option 3</option>
-            <option value={4}>Option 4</option>
+            {location.map((loc) => (
+              <option key={loc.location_id} value={loc.location_name}>
+                {loc.location_name}
+              </option>
+            ))}
           </Select>
         </FormControl>
         <FormControl sx={{ m: 1, minWidth: 200 }}>
@@ -90,8 +107,8 @@ const Home = () => {
       </div>
       {/* items */}
       <div className=" grid grid-cols-4 w-full gap-4 ">
-        {filterdItems &&
-          filterdItems.map((item) => (
+        {filteredItems &&
+          filteredItems.map((item) => (
             <div
               key={item.id}
               className="w-[250px] h-[400px] bg-slate-700 m-9 cursor-pointer hover:scale-105 transition-transform "
