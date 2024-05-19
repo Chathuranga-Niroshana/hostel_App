@@ -22,7 +22,7 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(hostelsWithImages);
+    return NextResponse.json({result:hostelsWithImages});
   } catch (error) {
     console.error("Error getting hostels with images:", error);
     return NextResponse.json(
@@ -57,7 +57,7 @@ export async function POST(req) {
       extra,
       requested,
       raitings,
-      images, // Expecting images as an array of URLs
+      images,
     } = await req.json();
 
     // Insert the new hostel

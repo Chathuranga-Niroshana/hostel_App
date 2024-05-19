@@ -1,17 +1,19 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
+import { useRouter } from "next/navigation";
 import Typography from "@mui/material/Typography";
-import { CardActionArea } from "@mui/material";
+import { Box, Button, CardActionArea } from "@mui/material";
 
 const Profile = () => {
   const router = useRouter();
   const [user, setUser] = useState();
   const [hostel, setHostel] = useState();
+
+  const navigate = (page) => router.push(page);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -64,7 +66,7 @@ const Profile = () => {
                 <tr>
                   <th className="border border-gray-300 p-2">Name</th>
                   <td className="border border-gray-300 p-2">
-                    {user.username} {user.id}
+                    {user.username}
                   </td>
                 </tr>
                 <tr>
@@ -100,27 +102,46 @@ const Profile = () => {
           My Hostels
         </h1>
 
-        <div className="flex gap-4 mt-6">
+        <div className="flex gap-4 mt-6 bg-slate-900 p-5 w-full min-h-[300px]">
           {hostel &&
             hostel.map((h, index) => (
-              <Card key={index} sx={{ maxWidth: 345 }}>
-                <CardActionArea>
-                  <CardMedia
+              <div onClick={() => navigate(`/hostel/${h.id}`)}>
+                <Card key={index} sx={{ width: 345 }}>
+                  <CardActionArea>
+                    {/* <CardMedia
                     component="img"
                     height="140"
                     image="/static/images/cards/contemplative-reptile.jpg"
                     alt="green iguana"
-                  />
-                  <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      {h.type} - {h.address}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Price: {h.price}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
+                  /> */}
+                    <CardContent
+                      sx={{
+                        width: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.4rem",
+                      }}
+                    >
+                      <Typography gutterBottom variant="h5" component="div">
+                        {h.type} - {h.address}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Price: Rs.{h.price}
+                      </Typography>
+                      <Box
+                        sx={{
+                          width: "100%",
+                          display: "flex",
+                          justifyContent: "right",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Button sx={{background:'#000'}} variant="contained">View Hostel</Button>
+                      </Box>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </div>
             ))}
         </div>
       </div>

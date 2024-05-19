@@ -1,18 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { items } from "./util/db.js";
+// import { items } from "./util/db.js";
 import { useRouter } from "next/navigation";
 
 const Home = () => {
   const router = useRouter();
   const navigate = (page) => router.push(page);
   const [filter, setFilter] = useState("");
+  const [items, setItems] = useState();
+
+  useEffect(() => {
+    const fetchHostels = async () => {
+      try {
+        const response = await fetch("/api/hostel", {
+          method: "GET",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setItems(data.result);
+          console.log(data.result);
+          console.log(data);
+        }
+      } catch (error) {
+        console.error("Error fetching hostels:", error);
+      }
+    };
+    fetchHostels();
+  }, []);
 
   const filterdItems = filter
     ? items.filter((item) => item.type === filter)
@@ -70,46 +90,47 @@ const Home = () => {
       </div>
       {/* items */}
       <div className=" grid grid-cols-4 w-full gap-4 ">
-        {filterdItems.map((item) => (
-          <div
-            key={item.id}
-            className="w-[250px] h-[400px] bg-slate-700 m-9 cursor-pointer hover:scale-105 transition-transform "
-            onClick={() => navigate(`/hostel/${item.id}`)}
-          >
-            <Image
-              alt="Bording Image"
-              src={item.images[0]}
-              height={250}
-              width={250}
-              className=" h-[250px] "
-            />
-            <div className=" w-full h-[150px] flex flex-col pl-4 justify-center ">
-              <span className=" text-red-300 ">
-                {item.type} with {item.bed_capacity} Bedrooms
-              </span>
-              <span className=" font-medium text-sm text-red-300 ">
-                {item.address}
-              </span>
-              <span className=" font-light text-xs text-red-300 ">
-                Rs. {item.price}
-              </span>
-              <span className=" font-light text-xs text-violet-300 ">
-                {item.attached_bathrooms == true ? (
-                  <span>With attached bathrooms</span>
-                ) : (
-                  <span></span>
-                )}
-              </span>
-              <span className=" font-light text-xs text-violet-300 ">
-                {item.shared_room == true ? (
-                  <span>Sheared room with {item.shared_number} persons </span>
-                ) : (
-                  <span></span>
-                )}
-              </span>
+        {filterdItems &&
+          filterdItems.map((item) => (
+            <div
+              key={item.id}
+              className="w-[250px] h-[400px] bg-slate-700 m-9 cursor-pointer hover:scale-105 transition-transform "
+              onClick={() => navigate(`/hostel/${item.id}`)}
+            >
+              <Image
+                alt="Bording Image"
+                src={item.images[0].image_url}
+                height={250}
+                width={250}
+                className=" h-[250px] "
+              />
+              <div className=" w-full h-[150px] flex flex-col pl-4 justify-center ">
+                <span className=" text-red-300 ">
+                  {item.type} with {item.bed_capacity} Bedrooms
+                </span>
+                <span className=" font-medium text-sm text-red-300 ">
+                  {item.address}
+                </span>
+                <span className=" font-light text-xs text-red-300 ">
+                  Rs. {item.price}
+                </span>
+                <span className=" font-light text-xs text-violet-300 ">
+                  {item.attached_bathrooms == true ? (
+                    <span>With attached bathrooms</span>
+                  ) : (
+                    <span></span>
+                  )}
+                </span>
+                <span className=" font-light text-xs text-violet-300 ">
+                  {item.shared_room == true ? (
+                    <span>Sheared room with {item.shared_number} persons </span>
+                  ) : (
+                    <span></span>
+                  )}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );
