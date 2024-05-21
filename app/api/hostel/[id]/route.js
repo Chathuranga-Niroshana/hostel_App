@@ -27,3 +27,41 @@ export async function GET(_, res) {
     );
   }
 }
+export async function DELETE(_, res) {
+  try {
+    const { id } = await res.params;
+    const selectHostelQuery = "SELECT * FROM hostel WHERE id=?";
+    const selectImagesQuery = "SELECT * FROM images WHERE hostel_id=?";
+    const selectCommentsQuery = "SELECT * FROM comments WHERE hostel_id=?";
+    const deleteImagesQuery = "DELETE FROM images WHERE hostel_id=?";
+    const deleteCommentsQuery = "DELETE FROM comments WHERE hostel_id=?";
+    const deleteHostelQuery = "DELETE FROM hostel WHERE id=?";
+
+    // Select hostel
+    const [hostel] = await db.query(selectHostelQuery, [id]);
+
+    if (hostel.length > 0) {
+      // Delete related images
+      const [imageResults] = await db.query(selectImagesQuery, [id]);
+      if (imageResults.length > 0) {
+        await db.query(deleteImagesQuery, [id]);
+      }
+      // Delete related comments
+      const [commentResults] = await db.query(selectCommentsQuery, [id]);
+      if (commentResults.length > 0) {
+        await db.query(deleteCommentsQuery, [id]);
+      }
+    }
+
+    // Delete hostel
+    await db.query(deleteHostelQuery, [id]);
+
+    return NextResponse.json({ message: "Hostel Deleted Successfully" });
+  } catch (error) {
+    console.error("Error deleting hostel:", error);
+    return NextResponse.json(
+      { error: "Error deleting hostel" },
+      { status: 500 }
+    );
+  }
+}
