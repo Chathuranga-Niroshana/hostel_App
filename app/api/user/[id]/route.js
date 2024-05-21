@@ -1,4 +1,4 @@
-import db from "@/app/db";
+import db from "@/app/utils/db";
 import { NextResponse } from "next/server";
 
 // get user
@@ -75,12 +75,12 @@ export async function PUT(req, res) {
     const { id } = await res.params;
     const updateQuery =
       "UPDATE user SET username=?, email=?, mobile=?,password=? WHERE id=? ";
-    const { username, email, mobile, password } = await req.body;
+    const { username, email, mobile, password } = await req.json();
     const values = [username, email, mobile, password, id];
 
-    const result = await db.query(updateQuery, values);
+    const [result] = await db.query(updateQuery, values);
 
-    return NextResponse.json({ message: "User Updated successfully", result });
+    return NextResponse.json({ message: "User Updated successfully" });
   } catch (error) {
     console.error("Error editing user:", error);
     return NextResponse.json(

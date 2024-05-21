@@ -1,5 +1,5 @@
 // login
-import db from "@/app/db";
+import db from "@/app/utils/db";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 

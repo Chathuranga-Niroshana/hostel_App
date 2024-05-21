@@ -14,12 +14,14 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
 
 const Profile = () => {
   const router = useRouter();
   const [user, setUser] = useState();
   const [hostel, setHostel] = useState();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [openUpdateUser, setOpenUpdateUser] = useState(false);
   const [openHostelDialog, setOpenHostelDialog] = useState(false);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -108,18 +110,63 @@ const Profile = () => {
     try {
       const response = await fetch(`/api/hostel/${selectedHostelId}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
       });
       if (response.ok) {
         console.log("Hostel Deleted Successfully");
         // Remove the deleted hostel from the state
         setHostel(hostel.filter((h) => h.id !== hostelId));
         handleCloseHostelDialog();
+        window.location.reload();
       } else {
         console.log("Hostel Not Deleted");
         handleCloseHostelDialog();
       }
     } catch (error) {
       console.error("Error deleting hostel:", error);
+    }
+  };
+
+  // update user
+  const handleUpdateClickOpen = () => {
+    setOpenUpdateUser(true);
+  };
+
+  const handleUpdateClose = () => {
+    setOpenUpdateUser(false);
+  };
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
+
+  const userData = { username, email, mobile, password };
+
+  const handleUpdateUser = async () => {
+    try {
+      const authToken = localStorage.getItem("auth-token");
+      const decodedToken = parseJwt(authToken);
+      const userId = decodedToken.user.id;
+
+      const response = await fetch(`/api/user/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+      if (response.ok) {
+        console.log("User Updated Successfully");
+        setOpenUpdateUser(false);
+        window.location.reload();
+      } else {
+        console.log("User Not Updated");
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
     }
   };
 
@@ -134,76 +181,169 @@ const Profile = () => {
   return (
     <div className="w-full h-full p-2  flex flex-col">
       <div className="w-full h-full   flex">
-        {user ? (
-          <div className="w-2/3 h-[200px]  bg-slate-500">
-            <table className="w-full">
-              <tbody>
-                <tr>
-                  <th className="border border-gray-300 p-2">Name</th>
-                  <td className="border border-gray-300 p-2">
-                    {user.username}
-                  </td>
-                </tr>
-                <tr>
-                  <th className="border border-gray-300 p-2">Email</th>
-                  <td className="border border-gray-300 p-2">{user.email} </td>
-                </tr>
-                <tr>
-                  <th className="border border-gray-300 p-2">Mobile</th>
-                  <td className="border border-gray-300 p-2">{user.mobile} </td>
-                </tr>
-              </tbody>
-            </table>
-            <div className="mt-2 flex items-center justify-evenly ">
-              <button className="bg-black  p-2 text-white w-1/3">Update</button>
-              {/* delete acc */}
-              <React.Fragment>
-                <Button
-                  sx={{
-                    background: "#000",
-                    padding: "9px",
-                    width: "33%",
-                    border: "none",
-                    borderRadius: "0",
-                    color: "#fff",
-                  }}
-                  variant="outlined"
-                  onClick={handleClickOpen}
-                >
-                  Delete Account
-                </Button>
-                <Dialog
-                  fullScreen={fullScreen}
-                  open={open}
-                  onClose={handleClose}
-                  aria-labelledby="responsive-dialog-title"
-                >
-                  <DialogTitle id="responsive-dialog-title">
-                    {"Do You want to delete your account?"}
-                  </DialogTitle>
-                  <DialogContent>
-                    <DialogContentText>
-                      If you do, you will lose every details.
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button autoFocus onClick={handleClose}>
-                      No
-                    </Button>
-                    <Button onClick={handleDelete} autoFocus>
-                      Yes
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </React.Fragment>
+        {user &&
+          user.map((user) => (
+            <div className="w-2/3 h-[200px]  bg-slate-500">
+              <table className="w-full">
+                <tbody>
+                  <tr>
+                    <th className="border border-gray-300 p-2">Name</th>
+                    <td className="border border-gray-300 p-2">
+                      {user.username}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border border-gray-300 p-2">Email</th>
+                    <td className="border border-gray-300 p-2">
+                      {user.email}{" "}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th className="border border-gray-300 p-2">Mobile</th>
+                    <td className="border border-gray-300 p-2">
+                      {user.mobile}{" "}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="mt-2 flex items-center justify-evenly ">
+                {/* update user */}
+                <React.Fragment>
+                  <Button
+                    sx={{
+                      background: "#000",
+                      padding: "9px",
+                      width: "33%",
+                      border: "none",
+                      borderRadius: "0",
+                      color: "#fff",
+                    }}
+                    variant="outlined"
+                    onClick={handleUpdateClickOpen}
+                  >
+                    Update
+                  </Button>
+                  <Dialog
+                    open={openUpdateUser}
+                    onClose={handleUpdateClose}
+                    PaperProps={{
+                      component: "form",
+                      onSubmit: (event) => {
+                        event.preventDefault();
+                        const formData = new FormData(event.currentTarget);
+                        const formJson = Object.fromEntries(formData.entries());
+                        const email = formJson.email;
+                        console.log(email);
+                        handleUpdateClose();
+                      },
+                    }}
+                  >
+                    <DialogTitle>Update Profile</DialogTitle>
+                    <DialogContent>
+                      <DialogContentText>
+                        Update your profile here
+                      </DialogContentText>
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="username"
+                        name="username"
+                        label="Username"
+                        onChange={(e) => setUsername(e.target.value)}
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                      />
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        name="email"
+                        label="Email Address"
+                        onChange={(e) => setEmail(e.target.value)}
+                        type="email"
+                        fullWidth
+                        variant="standard"
+                      />
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="mobile"
+                        name="mobile"
+                        label="Mobile No"
+                        type="number"
+                        onChange={(e) => setMobile(e.target.value)}
+                        fullWidth
+                        variant="standard"
+                      />
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        onChange={(e) => setPassword(e.target.value)}
+                        id="password"
+                        name="password"
+                        label="Password"
+                        type="password"
+                        fullWidth
+                        variant="standard"
+                      />
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleUpdateClose}>Cancel</Button>
+                      <Button onClick={handleUpdateUser}>Save</Button>
+                    </DialogActions>
+                  </Dialog>
+                </React.Fragment>
+
+                {/* delete acc */}
+                <React.Fragment>
+                  <Button
+                    sx={{
+                      background: "#000",
+                      padding: "9px",
+                      width: "33%",
+                      border: "none",
+                      borderRadius: "0",
+                      color: "#fff",
+                    }}
+                    variant="outlined"
+                    onClick={handleClickOpen}
+                  >
+                    Delete Account
+                  </Button>
+                  <Dialog
+                    fullScreen={fullScreen}
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby="responsive-dialog-title"
+                  >
+                    <DialogTitle id="responsive-dialog-title">
+                      {"Do You want to delete your account?"}
+                    </DialogTitle>
+                    <DialogContent>
+                      <DialogContentText>
+                        If you do, you will lose every details.
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button autoFocus onClick={handleClose}>
+                        No
+                      </Button>
+                      <Button onClick={handleDelete} autoFocus>
+                        Yes
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                </React.Fragment>
+              </div>
             </div>
-          </div>
-        ) : (
-          <p>Loading...</p>
-        )}
+          ))}
         <div className="w-1/3 h-[200px] bg-slate-200">
           <div className="mt-2 flex items-center justify-evenly ">
-            <button className="bg-black  p-2 text-white w-1/3">
+            <button
+              onClick={() => navigate("/profile/addhostel")}
+              className="bg-black  p-2 text-white w-1/3"
+            >
               Add Hostel
             </button>
           </div>
@@ -214,7 +354,7 @@ const Profile = () => {
           My Hostels
         </h1>
 
-        <div className="flex gap-4 mt-6 bg-slate-900 p-5 w-full min-h-[300px]">
+        <div className="flex  flex-wrap gap-4 mt-6 bg-slate-900 p-5 w-full min-h-[300px]">
           {hostel &&
             hostel.map((h) => (
               <div>
@@ -235,7 +375,7 @@ const Profile = () => {
                       }}
                     >
                       <Typography gutterBottom variant="h5" component="div">
-                        {h.type} - {h.address} {h.id}
+                        {h.type} - {h.address} 
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         Price: Rs.{h.price}
