@@ -5,6 +5,8 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import uploadImge from "../../../public/uploadImage.jpg";
+import Image from "next/image";
 
 const AddHostel = () => {
   const [type, setType] = useState("");
@@ -17,6 +19,12 @@ const AddHostel = () => {
   const [available_date, setAvailableDate] = useState();
   const [user, setUser] = useState();
   const [location, setLocation] = useState([]);
+  const [hostelId, setHostelId] = useState();
+  const [imageInput, setImageInput] = useState();
+  const [image1, setImage1] = useState();
+  const [image2, setImage2] = useState();
+  const [image3, setImage3] = useState();
+  const [image4, setImage4] = useState();
 
   const router = useRouter();
   const navigator = (page) => {
@@ -101,6 +109,10 @@ const AddHostel = () => {
         }),
       });
       if (response.ok) {
+        const data = await response.json();
+        const newHostelId = data.insertId;
+        // console.log(newHostelId);
+        setHostelId(newHostelId);
         alert("Hostel added successfully");
         console.log("Hostel added");
       }
@@ -110,10 +122,10 @@ const AddHostel = () => {
   };
 
   return (
-    <div className="w-full flex flex-col p-4">
+    <div className="w-full flex  p-4">
       {user && (
         <form
-          className="w-1/2 flex flex-col justify-evenly bg-slate-500 p-6"
+          className="w-1/2 h-[600px] flex flex-col justify-evenly bg-slate-500 p-6"
           onSubmit={createHostelHandler}
         >
           <div className="mt-2 w-full flex justify-between">
@@ -231,11 +243,89 @@ const AddHostel = () => {
             />
           </div>
           <div className="w-full flex justify-center items-center h-[40px] mt-[20px]">
-            <button className="bg-black p-2 text-white w-1/3" type="submit">
+            <button
+              className="bg-black p-2 text-white mt-3 w-1/3"
+              type="submit"
+            >
               Submit
             </button>
           </div>
         </form>
+      )}
+
+      {hostelId && (
+        <div className="w-1/2 p-4 h-[600px] bg-slate-600 ml-3 flex flex-col justify-between">
+          <label className=" font-medium text-lg" htmlFor="images">
+            Add Images
+          </label>
+          <div className="w-full h-1/3 flex flex-wrap justify-evenly">
+            <label htmlFor="image1">
+              <Image
+                src={image1 ? URL.createObjectURL(image1) : uploadImge}
+                alt="Upload here"
+                width={150}
+                height={150}
+              />
+            </label>
+            <input
+              type="file"
+              name="image1"
+              id="image1"
+              onChange={(e) => setImage1(e.target.files[0])}
+              hidden
+            />
+            <label htmlFor="image2">
+              <Image
+                src={image2 ? URL.createObjectURL(image2) : uploadImge}
+                alt="Upload here"
+                width={150}
+                height={150}
+              />
+            </label>
+            <input
+              type="file"
+              name="image2"
+              id="image2"
+              onChange={(e) => setImage2(e.target.files[0])}
+              hidden
+            />
+          </div>
+          <div className="w-full h-1/3 flex flex-wrap justify-evenly">
+            <label htmlFor="image3">
+              <Image
+                src={image3 ? URL.createObjectURL(image3) : uploadImge}
+                alt="Upload here"
+                width={150}
+                height={150}
+              />
+            </label>
+            <input
+              type="file"
+              name="image3"
+              id="image3"
+              onChange={(e) => setImage3(e.target.files[0])}
+              hidden
+            />
+            <label htmlFor="image4">
+              <Image
+                src={image4 ? URL.createObjectURL(image4) : uploadImge}
+                alt="Upload here"
+                width={150}
+                height={150}
+              />
+            </label>
+            <input
+              type="file"
+              name="image4"
+              id="image4"
+              onChange={(e) => setImage4(e.target.files[0])}
+              hidden
+            />
+          </div>
+          <div className="w-full flex justify-center items-center h-[40px] mt-[20px]">
+            <button className="bg-black p-2 text-white w-1/3">Submit</button>
+          </div>
+        </div>
       )}
     </div>
   );

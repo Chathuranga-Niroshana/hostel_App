@@ -65,3 +65,19 @@ export async function DELETE(_, res) {
     );
   }
 }
+
+// add images to the hostel
+export async function POST(req, res) {
+  try {
+    const { hostelId } = await res.params();
+    const { image } = await req.files();
+    const imageInsertQuery =
+      "INSERT INTO images (hostel_id,image_url) VALUES (?,?) ";
+  } catch (error) {
+    console.error("Error creating hostel:", error);
+    return NextResponse.json(
+      { error: "Error creating hostel" },
+      { status: 500 }
+    );
+  }
+}

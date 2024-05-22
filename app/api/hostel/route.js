@@ -69,7 +69,10 @@ export async function POST(req) {
     ]);
 
     return NextResponse.json(
-      { success: "Hostel created successfully" },
+      {
+        success: "Hostel created successfully",
+        insertId: newHostelResult.insertId,
+      },
       { status: 201 }
     );
   } catch (error) {
